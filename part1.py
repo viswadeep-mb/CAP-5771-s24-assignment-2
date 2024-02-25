@@ -38,24 +38,24 @@ def compute():
     dct = answers["1A: datasets"] = {}
 
     """
-   B. Write a function called fit_kmeans that takes dataset (before any processing on it), i.e., pair of (data, label) Numpy arrays, and the number of clusters as arguments, and returns the predicted labels from k-means clustering. Use the init='random' argument and make sure to standardize the data (see StandardScaler transform), prior to fitting the KMeans estimator.
+   B. Write a function called fit_kmeans that takes dataset (before any processing on it), i.e., pair of (data, label) Numpy arrays, and the number of clusters as arguments, and returns the predicted labels from k-means clustering. Use the init='random' argument and make sure to standardize the data (see StandardScaler transform), prior to fitting the KMeans estimator. This is the function you will use in the following questions. 
     """
 
     # dct value:  the `fit_kmeans` function
     dct = answers["1B: fit_kmeans"] = lambda: None
 
     """
-    C.	Make a big figure (4 rows x 5 columns) of scatter plots (where points are colored by predicted label) with each column corresponding to the datasets generated in part 1.A, and each row being k=[2,3,5,10] different number of clusters. Which datasets does k-means seem to produce correct clusters for (assuming the right number of k is specified) and for which datasets does k-means fail for all values of k? 
+    C.	Make a big figure (4 rows x 5 columns) of scatter plots (where points are colored by predicted label) with each column corresponding to the datasets generated in part 1.A, and each row being k=[2,3,5,10] different number of clusters. For which datasets does k-means seem to produce correct clusters for (assuming the right number of k is specified) and for which datasets does k-means fail for all values of k? 
     
     Create a pdf of the plots and return in your report. 
     """
 
-    # dct value: return a list of the abbreviated dataset names
-    # abbreviations: 'nc', 'nm', 'bvv', 'add', 'b'
-    dct = answers["1C: cluster successes"] = [""]
+    # dct value: return a dictionary of the abbreviated dataset names (zero or more elements) and associated k-values with correct clusters. 
+    # key abbreviations: 'nc', 'nm', 'bvv', 'add', 'b'. The values are the set of k for which there is success. Only return datasets where the list of cluster size k is non-empty.
+    dct = answers["1C: cluster successes"] = {"xy": [4,3], "zx": [2]} 
 
-    # dct value: list of dataset abbreviations
-    dct = answers["1C: cluster failures"] = [""]
+    # dct value: return a list of dataset abbreviations (list has zero or more elements, which are abbreviated dataset names as strings)
+    dct = answers["1C: cluster failures"] = ["xy"]
 
     """
     D. Repeat 1.C a few times and comment on which (if any) datasets seem to be sensitive to the choice of initialization for the k=2,3 cases. You do not need to add the additional plots to your report.
