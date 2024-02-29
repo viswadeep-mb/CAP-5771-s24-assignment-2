@@ -27,21 +27,16 @@ def compute():
     answers = {}
 
     """
-    A.	Load the provided dataset “hierachal_toy_data.mat” using the scipy.io.loadmat function.
+    A.	Load the provided dataset “hierachal_toy_data.mat” using the spicy.io.loadmat function.
     """
 
-    # return value of scipy.io.loadmat()
-    answers["3A: toy data"] = {}
+    answers["3A: toy data"] = None
 
     """
-    B.	Create a linkage matrix Z, and plot a dendrogram using the scipy.hierarchy.linkage and scipy.hierachy.dendrogram functions, with “single” linkage.
+    B.	Create a linkage matrix Z, and plot a dendrogram using the  scipy.hierarchy.linkage and scipy.hierachy.dendrogram functions, with “single” linkage.
     """
 
-    # Answer: NDArray
-    answers["3B: linkage"] = np.zeros(1)
-
-    # Answer: the return value of the dendogram function, dicitonary
-    answers["3B: dendogram"] = {}
+    answers["3B: dendogram"] = None
 
     """
     C.	Consider the merger of the cluster corresponding to points with index sets {I={8,2,13}} J={1,9}}. At what iteration (starting from 0) were these clusters merged? That is, what row does the merger of A correspond to in the linkage matrix Z? The rows count from 0. 
@@ -60,7 +55,7 @@ def compute():
     E.	In the actual algorithm, deciding which clusters to merge should consider all of the available clusters at each iteration. List all the clusters as index sets, e.g., {{0,1,2},{3,4},{5},{6},…},  that were available when the two clusters in part 2.D were merged.
     """
 
-    # List the clusters. the [[0,1,2], [3,4], [5], [6], ...} represents a list of lists.
+    # List the clusters. the [[0,1,2], [3,4], [5], [6], ...} represents a set of sets, written using lists
     answers["3E: clusters"] = [[0, 0], [0, 0]]
 
     """
