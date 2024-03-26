@@ -29,8 +29,21 @@ In the first task, you will explore how k-Means perform on datasets with diverse
 # Change the arguments and return according to 
 # the question asked. 
 
-def fit_kmeans():
-    return None
+def fit_kmeans(dataset,k):
+    data, labels = dataset
+
+    # Standardize the data
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+
+    # Fit KMeans clustering
+    kmeans = KMeans(n_clusters=k, init='random', random_state=42)
+    kmeans.fit(scaled_data)
+
+    # Get predicted labels
+    predicted_labels = kmeans.labels_
+    
+    return predicted_labels
 
 
 def compute():
@@ -44,6 +57,30 @@ def compute():
     # 'nc', 'nm', 'bvv', 'add', 'b'. keys: 'nc', 'nm', 'bvv', 'add', 'b' (abbreviated datasets)
     dct = answers["1A: datasets"] = {}
 
+    n_samples = 100
+    seed = 42
+
+    nc_data,nc_labels = datasets.make_circles(n_samples=n_samples, factor=0.5, noise=0.05, random_state=seed)
+
+    nm_data,nm_labels = datasets.make_moons(n_samples=n_samples, noise=0.05, random_state=seed)
+
+    b_data,b_labels = datasets.make_blobs(n_samples=n_samples, random_state=seed)
+
+    # blobs with varied variances
+    bvv_data,bvv_labels = datasets.make_blobs(n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=seed)
+
+    # Anisotropicly distributed data
+    X, y = datasets.make_blobs(n_samples=n_samples, random_state=seed)
+    transformation = [[0.6, -0.6], [-0.4, 0.8]]
+    add_data = np.dot(X, transformation)
+    add_labels = y
+    
+
+    dct["nc"] = [nc_data, nc_labels]
+    dct["nm"] = [nm_data, nm_labels]
+    dct["bvv"] = [bvv_data, bvv_labels]
+    dct["add"] = [add_data, add_labels]
+    dct["b"] = [b_data, b_labels]
     """
    B. Write a function called fit_kmeans that takes dataset (before any processing on it), i.e., pair of (data, label) Numpy arrays, and the number of clusters as arguments, and returns the predicted labels from k-means clustering. Use the init='random' argument and make sure to standardize the data (see StandardScaler transform), prior to fitting the KMeans estimator. This is the function you will use in the following questions. 
     """
@@ -57,7 +94,40 @@ def compute():
     
     Create a pdf of the plots and return in your report. 
     """
+    # Define the datasets
+    datasets = {
+        "Noisy Circles": (nc_data,nc_labels),
+        "Noisy Moons": (nm_data,nm_labels),
+        "Blobs with Varied Variances": (bvv_data,bvv_labels),
+        "Anisotropicly Distributed Data": (add_data,add_labels),
+        "Blobs": (b_data,b_labels)
+        }
 
+    # Define the number of clusters (k) for each row
+    num_clusters = [2, 3, 5, 10]
+
+    # Create a big figure
+    fig, axes = plt.subplots(nrows=len(num_clusters), ncols=len(datasets), figsize=(20, 16))
+    
+    # Iterate over each row and column
+    for i, k in enumerate(num_clusters):
+        for j, (dataset_name, dataset) in enumerate(datasets.items()):
+            # Fit KMeans clustering
+            predicted_labels = fit_kmeans(dataset, n_clusters=k)
+            
+            # Scatter plot
+            ax = axes[i, j]
+            ax.scatter(dataset[0][:, 0], dataset[0][:, 1], c=predicted_labels, cmap='viridis')
+            ax.set_title(f'{dataset_name}, k={k}')
+            ax.set_xticks([])
+            ax.set_yticks([])
+    
+    plt.tight_layout()
+    plt.show()
+
+
+
+    
     # dct value: return a dictionary of one or more abbreviated dataset names (zero or more elements) 
     # and associated k-values with correct clusters.  key abbreviations: 'nc', 'nm', 'bvv', 'add', 'b'. 
     # The values are the list of k for which there is success. Only return datasets where the list of cluster size k is non-empty.
