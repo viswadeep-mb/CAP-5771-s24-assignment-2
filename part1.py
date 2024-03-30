@@ -158,6 +158,37 @@ def compute():
     # dct value: list of dataset abbreviations
     # Look at your plots, and return your answers.
     # The plot is part of your report, a pdf file name "report.pdf", in your repository.
+
+    num_clusters = [2, 3]
+
+    for iteration in range(5):
+        pdf_filename = f"report_1D_{iteration+1}.pdf"
+        pdf_pages = []
+        
+        # Create a big figure
+        fig, axes = plt.subplots(nrows=len(num_clusters), ncols=len(datasets_def), figsize=(20, 16))
+    
+    # Iterate over each row and column
+        for i, k in enumerate(num_clusters):
+            for j, (dataset_name,dataset) in enumerate(datasets_def.items()):
+                # Fit KMeans clustering
+                predicted_labels = fit_kmeans(dataset, k)
+            
+                # Scatter plot
+                ax = axes[i, j]
+                ax.scatter(dataset[0][:, 0], dataset[0][:, 1], c=predicted_labels, cmap='viridis')
+                ax.set_title(f'{dataset_name}, k={k}')
+                ax.set_xticks([])
+                ax.set_yticks([])
+    
+        plt.tight_layout()
+        pdf_pages.append(fig)
+        plt.close(fig)
+
+
+        with PdfPages(pdf_filename) as pdf:
+            for page in pdf_pages:
+                pdf.savefig(page)
     dct = answers["1D: datasets sensitive to initialization"] = [""]
 
     return answers
