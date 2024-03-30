@@ -36,9 +36,27 @@ In this task you will explore different methods to find a good value for k
 # Change the arguments and return according to 
 # the question asked. 
 
-def fit_kmeans():
-    return None
+def fit_kmeans(dataset,k):
+    data, labels = dataset
 
+    # Standardize the data
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+
+    # Fit KMeans clustering
+    kmeans = KMeans(n_clusters=k, init='random', random_state=42)
+    kmeans.fit(scaled_data)
+
+    # Get predicted labels
+    predicted_labels = kmeans.labels_
+    # Calculate SSE
+    sse = 0
+    for i in range(k):
+        cluster_points = scaled_data[predicted_labels == i]
+        centroid = centroids[i]
+        sse += np.sum(np.square(cluster_points - centroid))
+    
+    return sse
 
 
 def compute():
@@ -50,7 +68,9 @@ def compute():
     """
 
     # dct: return value from the make_blobs function in sklearn, expressed as a list of three numpy arrays
-    dct = answers["2A: blob"] = [np.zeros(0)]
+
+    b_data,b_labels,centers = datasets.make_blobs(center_box=(-20,20), n_samples=20, centers=5, random_state=12,return_centers=True)
+    dct = answers["2A: blob"] = [b_data,b_labels,centers]
 
     """
     B. Modify the fit_kmeans function to return the SSE (see Equations 8.1 and 8.2 in the book).

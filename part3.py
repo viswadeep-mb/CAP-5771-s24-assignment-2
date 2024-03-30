@@ -27,8 +27,16 @@ Recall from lecture that agglomerative hierarchical clustering is a greedy itera
 # the question asked.
 
 
-def data_index_function():
-    return None
+def data_index_function(data, I, J):
+    
+    I = data[list(I)]
+    J = data[list(J)]
+
+    distances = np.sqrt(((I[:, np.newaxis] - J) ** 2).sum(axis=2))
+
+    min_distance = np.min(distances)
+    
+    return min_distancene
 
 
 def compute():
@@ -39,24 +47,31 @@ def compute():
     """
 
     # return value of scipy.io.loadmat()
-    answers["3A: toy data"] = {}
+    data = io.loadmat("hierarchical_toy_data.mat")
+    
+    answers["3A: toy data"] = data
 
     """
     B.	Create a linkage matrix Z, and plot a dendrogram using the scipy.hierarchy.linkage and scipy.hierachy.dendrogram functions, with “single” linkage.
     """
 
     # Answer: NDArray
-    answers["3B: linkage"] = np.zeros(1)
+    X = data['X']
+    
+    Z = sch.linkage(X, method='single')
+    dendrogram = sch.dendrogram(Z)
+    
+    answers["3B: linkage"] = Z
 
     # Answer: the return value of the dendogram function, dicitonary
-    answers["3B: dendogram"] = {}
+    answers["3B: dendogram"] = dendrogram
 
     """
     C.	Consider the merger of the cluster corresponding to points with index sets {I={8,2,13}} J={1,9}}. At what iteration (starting from 0) were these clusters merged? That is, what row does the merger of A correspond to in the linkage matrix Z? The rows count from 0. 
     """
 
     # Answer type: integer
-    answers["3C: iteration"] = -1
+    answers["3C: iteration"] = 4
 
     """
     D.	Write a function that takes the data and the two index sets {I,J} above, and returns the dissimilarity given by single link clustering using the Euclidian distance metric. The function should output the same value as the 3rd column of the row found in problem 2.C.
@@ -69,15 +84,26 @@ def compute():
     e.g., [{0,1,2},{3,4},{5},{6},…],  that were available when the two clusters in part 2.D were merged.
     """
 
+    I = {8, 2, 13}
+    J = {1, 9}
+
+    iteration = None
+    for i, row in enumerate(Z):
+        if set(row[:2]) == I or set(row[:2]) == J:
+            iteration = i
+            break
+            
+    clusters = [list(map(int, row[:2])) for row in Z[:iteration]]
+    
     # List the clusters. the [{0,1,2}, {3,4}, {5}, {6}, ...] represents a list of lists.
-    answers["3E: clusters"] = [{0, 0}, {0, 0}]
+    answers["3E: clusters"] = clusters
 
     """
     F.	Single linked clustering is often criticized as producing clusters where “the rich get richer”, that is, where one cluster is continuously merging with all available points. Does your dendrogram illustrate this phenomenon?
     """
 
     # Answer type: string. Insert your explanation as a string.
-    answers["3F: rich get richer"] = ""
+    answers["3F: rich get richer"] = "yes"
 
     return answers
 

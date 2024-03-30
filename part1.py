@@ -106,6 +106,9 @@ def compute():
     # Define the number of clusters (k) for each row
     num_clusters = [2, 3, 5, 10]
 
+    df_filename = "report_1C.pdf"
+    pdf_pages = []
+
     # Create a big figure
     fig, axes = plt.subplots(nrows=len(num_clusters), ncols=len(datasets), figsize=(20, 16))
     
@@ -123,7 +126,13 @@ def compute():
             ax.set_yticks([])
     
     plt.tight_layout()
-    plt.show()
+    pdf_pages.append(fig)
+    plt.close(fig)
+
+
+    with PdfPages(pdf_filename) as pdf:
+        for page in pdf_pages:
+            pdf.savefig(page)
 
 
 
@@ -131,11 +140,11 @@ def compute():
     # dct value: return a dictionary of one or more abbreviated dataset names (zero or more elements) 
     # and associated k-values with correct clusters.  key abbreviations: 'nc', 'nm', 'bvv', 'add', 'b'. 
     # The values are the list of k for which there is success. Only return datasets where the list of cluster size k is non-empty.
-    dct = answers["1C: cluster successes"] = {"xy": [3,4], "zx": [2]} 
+    dct = answers["1C: cluster successes"] = {"bvv": [2,3], "add": [2,3],"b":[2,3]}
 
     # dct value: return a list of 0 or more dataset abbreviations (list has zero or more elements, 
     # which are abbreviated dataset names as strings)
-    dct = answers["1C: cluster failures"] = ["xy"]
+    dct = answers["1C: cluster failures"] = ["nc","nm"]
 
     """
     D. Repeat 1.C a few times and comment on which (if any) datasets seem to be sensitive to the choice of initialization for the k=2,3 cases. You do not need to add the additional plots to your report.
