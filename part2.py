@@ -24,6 +24,8 @@ import math
 from sklearn.cluster import AgglomerativeClustering
 import pickle
 import utils as u
+from sklearn.cluster import KMeans
+warnings.filterwarnings("ignore")
 
 # ----------------------------------------------------------------------
 """
@@ -37,7 +39,7 @@ In this task you will explore different methods to find a good value for k
 # the question asked. 
 
 def fit_kmeans(dataset,k):
-    data, labels = dataset
+    data, labels , t_centers = dataset
 
     # Standardize the data
     scaler = StandardScaler()
@@ -47,16 +49,26 @@ def fit_kmeans(dataset,k):
     kmeans = KMeans(n_clusters=k, init='random', random_state=42)
     kmeans.fit(scaled_data)
 
-    # Get predicted labels
-    predicted_labels = kmeans.labels_
-    # Calculate SSE
-    sse = 0
-    for i in range(k):
-        cluster_points = scaled_data[predicted_labels == i]
-        centroid = centroids[i]
-        sse += np.sum(np.square(cluster_points - centroid))
+    centers = kmeans.cluster_centers_
+    
+    distances = np.sqrt(np.sum((scaled_data - centers[kmeans.labels_])**2, axis=1))
+    
+    sse = np.sum(distances ** 2)
     
     return sse
+
+def fit_kmeans_inertia(dataset,k):
+    data, labels , centers = dataset
+
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+
+    kmeans = KMeans(n_clusters=k, init='random', random_state=42)
+    kmeans.fit(scaled_data)
+
+    inertia = kmeans.inertia_
+  
+    return inertia
 
 
 def compute():
@@ -69,8 +81,8 @@ def compute():
 
     # dct: return value from the make_blobs function in sklearn, expressed as a list of three numpy arrays
 
-    b_data,b_labels,centers = datasets.make_blobs(center_box=(-20,20), n_samples=20, centers=5, random_state=12,return_centers=True)
-    dct = answers["2A: blob"] = [b_data,b_labels,centers]
+    b = datasets.make_blobs(center_box=(-20,20), n_samples=20, centers=5, random_state=12,return_centers=True)
+    dct = answers["2A: blob"] = [b]
 
     """
     B. Modify the fit_kmeans function to return the SSE (see Equations 8.1 and 8.2 in the book).
@@ -82,20 +94,37 @@ def compute():
     """
     C.	Plot the SSE as a function of k for k=1,2,….,8, and choose the optimal k based on the elbow method.
     """
-
+    
     # dct value: a list of tuples, e.g., [[0, 100.], [1, 200.]]
-    # Each tuple is a (k, SSE) pair
-    dct = answers["2C: SSE plot"] = [[0.0, 100.0]]
+    # Each tuple is a (k, SSE) pair   
+    
+    sse_values = []
+    for k in range(1, 8 + 1):
+        sse = fit_kmeans(b, k)
+        sse_values.append((k, sse))
+
+    sse_values_final = [[k, float(sse)] for k, sse in sse_values]
+
+    dct = answers["2C: SSE plot"] = sse_values_final
 
     """
     D.	Repeat part 2.C for inertia (note this is an attribute in the kmeans estimator called _inertia). Do the optimal k’s agree?
     """
 
     # dct value has the same structure as in 2C
-    dct = answers["2D: inertia plot"] = [[0.0, 100.0]]
+
+    inertia_values = []
+    for k in range(1, 8 + 1):
+        inertia = fit_kmeans_inertia(b, k)
+        inertia_values.append((k, inertia))
+
+    inertia_values_final = [[k, float(inertia)] for k, inertia in inertia_values]
+
+    dct = answers["2D: inertia plot"] = inertia_values_final
+ 
 
     # dct value should be a string, e.g., "yes" or "no"
-    dct = answers["2D: do ks agree?"] = ""
+    dct = answers["2D: do ks agree?"] = "yes"
 
     return answers
 
