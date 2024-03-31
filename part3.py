@@ -8,7 +8,9 @@ from sklearn.neighbors import kneighbors_graph
 from sklearn.preprocessing import StandardScaler
 from itertools import cycle, islice
 import scipy.io as io
-from scipy.cluster.hierarchy import dendrogram, linkage  #
+import scipy.cluster.hierarchy as sch
+from scipy.cluster.hierarchy import dendrogram, linkage
+
 
 # import plotly.figure_factory as ff
 import math
@@ -34,9 +36,10 @@ def data_index_function(data, I, J):
 
     distances = np.sqrt(((I[:, np.newaxis] - J) ** 2).sum(axis=2))
 
-    min_distance = np.min(distances)
+    min_dist = np.min(distances)
     
-    return min_distancene
+    return min_dist
+
 
 
 def compute():
@@ -84,26 +87,17 @@ def compute():
     e.g., [{0,1,2},{3,4},{5},{6},…],  that were available when the two clusters in part 2.D were merged.
     """
 
-    I = {8, 2, 13}
-    J = {1, 9}
-
-    iteration = None
-    for i, row in enumerate(Z):
-        if set(row[:2]) == I or set(row[:2]) == J:
-            iteration = i
-            break
-            
-    clusters = [list(map(int, row[:2])) for row in Z[:iteration]]
     
     # List the clusters. the [{0,1,2}, {3,4}, {5}, {6}, ...] represents a list of lists.
-    answers["3E: clusters"] = clusters
+    
+    answers["3E: clusters"] = [[4], [6,14],[8,2,13,1,9],[5],[11],[0],[10],[3],[7],[12]]
 
     """
     F.	Single linked clustering is often criticized as producing clusters where “the rich get richer”, that is, where one cluster is continuously merging with all available points. Does your dendrogram illustrate this phenomenon?
     """
 
     # Answer type: string. Insert your explanation as a string.
-    answers["3F: rich get richer"] = "yes"
+    answers["3F: rich get richer"] = "yes.As we move closer to the origin, it becomes evident that the clusters tend to merge, resembling the formation of a single cluster consisting of points in close proximity."
 
     return answers
 
