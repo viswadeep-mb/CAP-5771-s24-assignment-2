@@ -9,6 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from itertools import cycle, islice
 import scipy.io as io
 from scipy.cluster.hierarchy import dendrogram, linkage  #
+from matplotlib.backends.backend_pdf import PdfPages
+from scipy.cluster.hierarchy import linkage as scipy_linkage
 
 # import plotly.figure_factory as ff
 import math
@@ -26,6 +28,7 @@ In this task, you will explore hierarchical clustering over different datasets. 
 # Change the arguments and return according to 
 # the question asked. 
 
+
 def fit_hierarchical_cluster(dataset, n_clusters, linkage='ward'):
     
     data, labels = dataset
@@ -38,21 +41,31 @@ def fit_hierarchical_cluster(dataset, n_clusters, linkage='ward'):
         
     return hierarchical_cluster.labels_
 
-def fit_modified(dataset, cutoff_distance, linkage_method):
-    
+def fit_modified(dataset, distance_threshold, linkage_method):
     data, labels = dataset
     
     scaler = StandardScaler()
     data_scaled = scaler.fit_transform(data)
     
-    Z = scipy_linkage(data_scaled, method=linkage_method)  
-    
-    num_clusters = len(np.where(Z[:, 2] > cutoff_distance)[0]) + 1
-    
-    hierarchical_cluster = AgglomerativeClustering(n_clusters=num_clusters, linkage=linkage_method)
+    hierarchical_cluster = AgglomerativeClustering(n_clusters = None, distance_threshold=distance_threshold, linkage=linkage_method)
     hierarchical_cluster.fit(data_scaled)
     
     return hierarchical_cluster.labels_
+
+def calculate_distance_threshold(dataset, linkage_type):
+
+    data, labels = dataset
+    scaler = StandardScaler()
+    data_scaled = scaler.fit_transform(data)
+    Z = linkage(data_scaled, method=linkage_type)
+    
+    merge_distances = np.diff(Z[:, 2])
+    
+    max_rate_change_idx = np.argmax(merge_distances)
+    
+    distance_threshold = Z[max_rate_change_idx, 2]
+    
+    return distance_threshold
 
 
 def compute():
@@ -69,27 +82,25 @@ def compute():
     n_samples = 100
     seed = 42
 
-    nc_data,nc_labels = datasets.make_circles(n_samples=n_samples, factor=0.5, noise=0.05, random_state=seed)
-
-    nm_data,nm_labels = datasets.make_moons(n_samples=n_samples, noise=0.05, random_state=seed)
-
-    b_data,b_labels = datasets.make_blobs(n_samples=n_samples, random_state=seed)
+    nc= datasets.make_circles(n_samples=n_samples, factor=0.5, noise=0.05, random_state=seed)
+    nm = datasets.make_moons(n_samples=n_samples, noise=0.05, random_state=seed)
+    b = datasets.make_blobs(n_samples=n_samples, random_state=seed)
 
     # blobs with varied variances
-    bvv_data,bvv_labels = datasets.make_blobs(n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=seed)
+    bvv = datasets.make_blobs(n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=seed)
 
     # Anisotropicly distributed data
     X, y = datasets.make_blobs(n_samples=n_samples, random_state=seed)
     transformation = [[0.6, -0.6], [-0.4, 0.8]]
     add_data = np.dot(X, transformation)
-    add_labels = y 
+    add = (add_data,y) 
     
 
-    dct["nc"] = [nc_data, nc_labels]
-    dct["nm"] = [nm_data, nm_labels]
-    dct["bvv"] = [bvv_data, bvv_labels]
-    dct["add"] = [add_data, add_labels]
-    dct["b"] = [b_data, b_labels]
+    dct["nc"] = [nc]
+    dct["nm"] = [nm]
+    dct["bvv"] = [bvv]
+    dct["add"] = [add]
+    dct["b"] = [b]
 
     # dct value:  the `fit_hierarchical_cluster` function
     dct = answers["4A: fit_hierarchical_cluster"] = fit_hierarchical_cluster
@@ -100,39 +111,38 @@ def compute():
     Create a pdf of the plots and return in your report. 
     """
 
-    datasets = {
-        "nc": (nc_data,nc_labels),
-        "nm": (nm_data,nm_labels),
-        "bvv": (bvv_data,bvv_labels),
-        "add": (add_data,add_labels),
-        "b": (b_data,b_labels)
+    datasets_def = {
+        "nc": nc,
+        "nm": nm,
+        "bvv": bvv,
+        "add": add,
+        "b": b
         }
 
     num_clusters = [2]
-    dataset_keys = ['nc', 'nm', 'bvv', 'add', 'b']
     linkage_types = ['single', 'complete', 'ward', 'average']
     pdf_filename = "report_4B.pdf"
     pdf_pages = []
 
-
-    fig, axes = plt.subplots(len(linkage_types), len(dataset_keys), figsize=(20, 16))
-    fig.suptitle('Scatter plots for different datasets and linkage types (2 clusters)', fontsize=16)
-            
+    # Create a big figure
+    fig, axes = plt.subplots(nrows=len(linkage_types), ncols=len(datasets_def), figsize=(20, 16))
+    
+    # Iterate over each row and column
     for i, linkage_type in enumerate(linkage_types):
-        for j, dataset_key in enumerate(dataset_keys):
-            data, labels = datasets[dataset_key]
-
+        for j, (dataset_name,dataset) in enumerate(datasets_def.items()):
+            
             for k in num_clusters:
-                predicted_labels = fit_hierarchical_cluster_linkage(given_datasets[dataset_key], n_clusters=k, linkage=linkage_type)
-
+                predicted_labels = fit_hierarchical_cluster(dataset, n_clusters=k, linkage=linkage_type)
+            
+                # Scatter plot
                 ax = axes[i, j]
-                ax.scatter(data[:, 0], data[:, 1], c=predicted_labels, cmap='viridis')
-                ax.set_title(f'{linkage_type.capitalize()} Linkage\n{dataset_key}, k={k}')
-
+                ax.scatter(dataset[0][:, 0], dataset[0][:, 1], c=predicted_labels, cmap='viridis')
+                ax.set_title(f'{linkage_type} Linkage\n{dataset_name}, k={k}')
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     pdf_pages.append(fig)
     plt.close(fig)
+
 
     with PdfPages(pdf_filename) as pdf:
         for page in pdf_pages:
@@ -147,10 +157,38 @@ def compute():
     Create a pdf of the plots and return in your report. 
     """
 
+    pdf_filename = "report_4C.pdf"
+    pdf_pages = []
+    distance_thresholds = {}
+    
+    fig, axes = plt.subplots(len(linkage_types), len(datasets_def), figsize=(20, 16))
+    
+    for i, linkage_type in enumerate(linkage_types):
+        for j, (dataset_name,dataset) in enumerate(datasets_def.items()):
+            
+            distance_threshold = calculate_distance_threshold(dataset, linkage_type)
+            distance_thresholds[(dataset_name, linkage_type)] = distance_threshold
+            
+            predicted_labels = fit_modified(dataset, distance_threshold, linkage_type)
+    
+            ax = axes[i, j]
+            ax.scatter(dataset[0][:, 0], dataset[0][:, 1], c=predicted_labels, cmap='viridis')
+            ax.set_title(f'{linkage_type} Linkage\n{dataset_name}')
+    
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    pdf_pages.append(fig)
+    plt.close(fig)
+    
+    with PdfPages(pdf_filename) as pdf:
+        for page in pdf_pages:
+            pdf.savefig(page)
+    
+    
     # dct is the function described above in 4.C
-    dct = answers["4A: modified function"] = fit_modified
+    dct = answers["4C: modified function"] = fit_modified
 
     return answers
+
 
 
 # ----------------------------------------------------------------------
