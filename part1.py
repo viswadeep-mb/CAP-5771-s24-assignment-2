@@ -49,6 +49,23 @@ def fit_kmeans(dataset,k):
     
     return predicted_labels
 
+def fit_kmeans_random(dataset,k):
+    data, labels = dataset
+
+    # Standardize the data
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+
+    # Fit KMeans clustering
+    kmeans = KMeans(n_clusters=k, init='random')
+    kmeans.fit(scaled_data)
+
+    # Get predicted labels
+    predicted_labels = kmeans.labels_
+    
+    return predicted_labels
+
+
 
 def compute():
     answers = {}
@@ -143,7 +160,7 @@ def compute():
     # dct value: return a dictionary of one or more abbreviated dataset names (zero or more elements) 
     # and associated k-values with correct clusters.  key abbreviations: 'nc', 'nm', 'bvv', 'add', 'b'. 
     # The values are the list of k for which there is success. Only return datasets where the list of cluster size k is non-empty.
-    dct = answers["1C: cluster successes"] = {"bvv": [2,3], "add": [2,3],"b":[2,3]}
+    dct = answers["1C: cluster successes"] = {"bvv": [3], "add": [3],"b":[3]}
 
     # dct value: return a list of 0 or more dataset abbreviations (list has zero or more elements, 
     # which are abbreviated dataset names as strings)
@@ -172,7 +189,7 @@ def compute():
         for i, k in enumerate(num_clusters):
             for j, (dataset_name,dataset) in enumerate(datasets_def.items()):
                 # Fit KMeans clustering
-                predicted_labels = fit_kmeans(dataset, k)
+                predicted_labels = fit_kmeans_random(dataset, k)
             
                 # Scatter plot
                 ax = axes[i, j]
@@ -189,7 +206,7 @@ def compute():
         with PdfPages(pdf_filename) as pdf:
             for page in pdf_pages:
                 pdf.savefig(page)
-    dct = answers["1D: datasets sensitive to initialization"] = [""]
+    dct = answers["1D: datasets sensitive to initialization"] = ["nc"]
 
     return answers
 

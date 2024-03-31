@@ -90,7 +90,7 @@ def compute():
     
     # List the clusters. the [{0,1,2}, {3,4}, {5}, {6}, ...] represents a list of lists.
     
-    answers["3E: clusters"] = [[4], [6,14],[8,2,13,1,9],[5],[11],[0],[10],[3],[7],[12]]
+    answers["3E: clusters"] = [[4], [6,14],[1,2,8,13,9],[5],[11],[0],[10],[3],[7],[12]]
 
     """
     F.	Single linked clustering is often criticized as producing clusters where “the rich get richer”, that is, where one cluster is continuously merging with all available points. Does your dendrogram illustrate this phenomenon?
